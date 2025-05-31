@@ -25,10 +25,14 @@ public class TestPlugin implements Plugin {
     @Override
     public void start() {
         System.out.println("TestPlugin started!");
+        EventBus.registerLoginListener(event -> {
+            if(event.isSuccess())
+                System.out.println("Plugin received login success for user: " + event.getUsername());
+            else
+                System.out.println("Plugin received login failure for user: " + event.getUsername());
+        });
         EventBus.registerRefreshListener(event -> {
             System.out.println("Plugin received refresh from " + event.getFrom() + " to " + event.getTo());
-            if(event.getFrom().equalsIgnoreCase("login"))
-                System.out.println(MetarAPPApi.getInstance().getLastSearchList());
         });
         EventBus.registerSendIcaoListeners(event -> {
             System.out.println("Plugin received send ICAO event: " + event.getIcao());
@@ -58,5 +62,20 @@ public class TestPlugin implements Plugin {
     @Override
     public String getAuthor() {
         return "FrameDev";
+    }
+
+    @Override
+    public String getWebsite() {
+        return "";
+    }
+
+    @Override
+    public String getNewVersion() {
+        return "";
+    }
+
+    @Override
+    public String getDownloadLink() {
+        return "";
     }
 }
