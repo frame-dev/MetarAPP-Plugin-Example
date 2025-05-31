@@ -11,10 +11,20 @@ package ch.framedev;
  * This Class was created at 30.05.2025 23:38
  */
 
-import ch.framedev.metarapp.events.EventBus;
+import ch.framedev.metarapp.events.*;
 import ch.framedev.metarapp.util.Plugin;
 
+import java.util.function.Consumer;
+
 public class TestPlugin implements Plugin {
+
+    private Consumer<CallRefreshEvent> refreshListener;
+    private Consumer<SendIcaoEvent> sendIcaoListener;
+    private Consumer<DownloadedFileEvent> downloadedFileListener;
+    private Consumer<DisplayMetarEvent> displayMetarListener;
+    private Consumer<LoginEvent> loginListener;
+    private Consumer<DatabaseSendEvent> databaseSendListener;
+    private Consumer<DatabaseErrorEvent> databaseErrorListener;
 
     @Override
     public void initialize() {
@@ -25,32 +35,60 @@ public class TestPlugin implements Plugin {
     public void start() {
         System.out.println("TestPlugin started!");
 
-        EventBus.registerDatabaseSendListener(event -> {
+        databaseErrorListener = event -> {
+            System.out.println("⚠️ Plugin received a database error:");
+            System.out.println("Database: " + event.getDatabaseName());
+            System.out.println("Message: " + event.getErrorMessage());
+            System.out.println("Cause: " + event.getError().getLocalizedMessage());
+        };
+        EventBus.registerDatabaseErrorListener(databaseErrorListener);
+
+        databaseSendListener = event -> {
             System.out.println("Plugin received database send event: " + event.getDatabaseName() + " - " + event.getQuery());
-        });
-        EventBus.registerDisplayMetarListener(event -> {
+        };
+        EventBus.registerDatabaseSendListener(databaseSendListener);
+
+        displayMetarListener = event -> {
             System.out.println("Plugin received METAR: " + event.getIcao() + " - " + event.getData());
-        });
-        EventBus.registerDownloadedFileListener(event -> {
+        };
+        EventBus.registerDisplayMetarListener(displayMetarListener);
+
+        downloadedFileListener = event -> {
             System.out.println("Plugin received downloaded file: " + event.getFilePath());
-        });
-        EventBus.registerLoginListener(event -> {
-            if(event.isSuccess())
+        };
+        EventBus.registerDownloadedFileListener(downloadedFileListener);
+
+        loginListener = event -> {
+            if (event.isSuccess()) {
                 System.out.println("Plugin received login success for user: " + event.getUsername());
-            else
+            } else {
                 System.out.println("Plugin received login failure for user: " + event.getUsername());
-        });
-        EventBus.registerRefreshListener(event -> {
+            }
+        };
+        EventBus.registerLoginListener(loginListener);
+
+        refreshListener = event -> {
             System.out.println("Plugin received refresh from " + event.getFrom() + " to " + event.getTo());
-        });
-        EventBus.registerSendIcaoListeners(event -> {
+        };
+        EventBus.registerRefreshListener(refreshListener);
+
+        sendIcaoListener = event -> {
             System.out.println("Plugin received send ICAO event: " + event.getIcao());
-        });
+        };
+        EventBus.registerSendIcaoListeners(sendIcaoListener);
     }
 
     @Override
     public void stop() {
         System.out.println("TestPlugin stopped!");
+
+        EventBus.unregisterDatabaseErrorListener(databaseErrorListener);
+        EventBus.unregisterDatabaseSendListener(databaseSendListener);
+        EventBus.unregisterDisplayMetarListener(displayMetarListener);
+        EventBus.unregisterDownloadedFileListener(downloadedFileListener);
+        EventBus.unregisterLoginListener(loginListener);
+        EventBus.unregisterRefreshListener(refreshListener);
+        EventBus.unregisterSendIcaoListener(sendIcaoListener);
     }
 
     @Override
