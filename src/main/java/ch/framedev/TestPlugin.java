@@ -25,6 +25,9 @@ public class TestPlugin implements Plugin {
     public void start() {
         System.out.println("TestPlugin started!");
 
+        EventBus.registerDatabaseSendListener(event -> {
+            System.out.println("Plugin received database send event: " + event.getDatabaseName() + " - " + event.getQuery());
+        });
         EventBus.registerDisplayMetarListener(event -> {
             System.out.println("Plugin received METAR: " + event.getIcao() + " - " + event.getData());
         });
