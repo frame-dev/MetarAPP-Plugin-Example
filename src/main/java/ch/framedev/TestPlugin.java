@@ -23,8 +23,10 @@ public class TestPlugin implements Plugin {
     private Consumer<DownloadedFileEvent> downloadedFileListener;
     private Consumer<DisplayMetarEvent> displayMetarListener;
     private Consumer<LoginEvent> loginListener;
+    private Consumer<LogoutEvent> logoutListener;
     private Consumer<DatabaseSendEvent> databaseSendListener;
     private Consumer<DatabaseErrorEvent> databaseErrorListener;
+    private Consumer<ErrorEvent> errorListener;
 
     @Override
     public void initialize() {
@@ -34,6 +36,20 @@ public class TestPlugin implements Plugin {
     @Override
     public void start() {
         System.out.println("TestPlugin started!");
+
+        // Registering event listeners
+        logoutListener = event -> {
+            System.out.println("Plugin received logout event for user: " + event.getUsername());
+            event.setMessage("Fuck you for using MetarApp!");
+        };
+        EventBus.registerLogoutListener(logoutListener);
+
+        errorListener = event -> {
+            System.out.println("⚠️ Plugin received an error:");
+            System.out.println("Message: " + event.getMessage());
+            System.out.println("Cause: " + event.getErrorCode());
+        };
+        EventBus.registerErrorListener(errorListener);
 
         databaseErrorListener = event -> {
             System.out.println("⚠️ Plugin received a database error:");
@@ -89,6 +105,8 @@ public class TestPlugin implements Plugin {
         EventBus.unregisterLoginListener(loginListener);
         EventBus.unregisterRefreshListener(refreshListener);
         EventBus.unregisterSendIcaoListener(sendIcaoListener);
+        EventBus.unregisterErrorListener(errorListener);
+        EventBus.unregisterLogoutListener(logoutListener);
     }
 
     @Override
