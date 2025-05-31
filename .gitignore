@@ -40,3 +40,4 @@ build/
 /.idea/
 build.sh
 delete_unnecessary_files.sh
+/src/main/java/ch/framedev/FuckPlugin.java
