@@ -11,7 +11,6 @@ package ch.framedev;
  * This Class was created at 30.05.2025 23:38
  */
 
-import ch.framedev.metarapp.apis.MetarAPPApi;
 import ch.framedev.metarapp.events.EventBus;
 import ch.framedev.metarapp.util.Plugin;
 
@@ -25,6 +24,13 @@ public class TestPlugin implements Plugin {
     @Override
     public void start() {
         System.out.println("TestPlugin started!");
+
+        EventBus.registerDisplayMetarListener(event -> {
+            System.out.println("Plugin received METAR: " + event.getIcao() + " - " + event.getData());
+        });
+        EventBus.registerDownloadedFileListener(event -> {
+            System.out.println("Plugin received downloaded file: " + event.getFilePath());
+        });
         EventBus.registerLoginListener(event -> {
             if(event.isSuccess())
                 System.out.println("Plugin received login success for user: " + event.getUsername());
