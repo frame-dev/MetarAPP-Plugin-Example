@@ -26,6 +26,7 @@ public class TestPlugin implements Plugin {
     private Consumer<LogoutEvent> logoutListener;
     private Consumer<DatabaseSendEvent> databaseSendListener;
     private Consumer<DatabaseErrorEvent> databaseErrorListener;
+    private Consumer<DatabaseChangeEvent> databaseChangeListener;
     private Consumer<ErrorEvent> errorListener;
 
     @Override
@@ -37,19 +38,17 @@ public class TestPlugin implements Plugin {
     public void start() {
         System.out.println("TestPlugin started!");
 
-        // Registering event listeners
-        logoutListener = event -> {
-            System.out.println("Plugin received logout event for user: " + event.getUsername());
-            event.setMessage("Fuck you for using MetarApp!");
-        };
-        EventBus.registerLogoutListener(logoutListener);
-
         errorListener = event -> {
             System.out.println("⚠️ Plugin received an error:");
             System.out.println("Message: " + event.getMessage());
             System.out.println("Cause: " + event.getErrorCode());
         };
         EventBus.registerErrorListener(errorListener);
+
+        databaseChangeListener = event -> {
+            System.out.println("Plugin received database change event: " + event.getDatabaseType());
+        };
+        EventBus.registerDatabaseChangeListener(databaseChangeListener);
 
         databaseErrorListener = event -> {
             System.out.println("⚠️ Plugin received a database error:");
@@ -83,6 +82,12 @@ public class TestPlugin implements Plugin {
         };
         EventBus.registerLoginListener(loginListener);
 
+        logoutListener = event -> {
+            System.out.println("Plugin received logout event for user: " + event.getUsername());
+            event.setMessage("Fuck you for using MetarApp!");
+        };
+        EventBus.registerLogoutListener(logoutListener);
+
         refreshListener = event -> {
             System.out.println("Plugin received refresh from " + event.getFrom() + " to " + event.getTo());
         };
@@ -100,6 +105,7 @@ public class TestPlugin implements Plugin {
 
         EventBus.unregisterDatabaseErrorListener(databaseErrorListener);
         EventBus.unregisterDatabaseSendListener(databaseSendListener);
+        EventBus.unregisterDatabaseChangeListener(databaseChangeListener);
         EventBus.unregisterDisplayMetarListener(displayMetarListener);
         EventBus.unregisterDownloadedFileListener(downloadedFileListener);
         EventBus.unregisterLoginListener(loginListener);
